@@ -8,4 +8,5 @@ class TaskAppBeYoutubeApplication
 
 fun main(args: Array<String>) {
     runApplication<TaskAppBeYoutubeApplication>(*args)
+    println("Marhaba ya shabaab /مرحبا يا شباب")
 }
