@@ -80,4 +80,10 @@ class TaskService(private val repository: TaskRepository) {
         val savedTask: Task = repository.save(existingTask)
         return mappingEntityToDto(savedTask)
     }
+
+    fun deleteTask(id: Long): String {
+        checkTaskForId(id)
+        repository.deleteById(id)
+        return "Task with the ID: $id has been deleted."
+    }
 }
