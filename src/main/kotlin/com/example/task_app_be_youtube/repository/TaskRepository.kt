@@ -12,6 +12,7 @@ interface TaskRepository : JpaRepository<Task, Long> {
 
     @Query(value = "SELECT * FROM task WHERE is_task_open = TRUE", nativeQuery = true)
     fun queryAllOpenTasks(): List<Task>
+
     @Query(value = "SELECT * FROM task WHERE is_task_open = FALSE", nativeQuery = true)
     fun queryAllClosedTasks(): List<Task>
 
