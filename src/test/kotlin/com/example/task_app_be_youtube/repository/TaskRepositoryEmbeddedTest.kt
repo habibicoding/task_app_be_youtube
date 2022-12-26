@@ -21,10 +21,60 @@ class TaskRepositoryEmbeddedTest {
     @Sql("classpath:test-data.sql")
     fun `when task is saved then check for not null`() {
         // Given
-        // Then
+        // When
         val task: Task = objectUnderTest.findTaskById(111)
 
         // Then
         assertThat(task).isNotNull
     }
+
+    @Test
+    @Sql("classpath:test-data.sql")
+    fun `when all tasks are fetched then check for the number of records`() {
+        // Given
+        // When
+        val tasks: List<Task> = objectUnderTest.findAll()
+
+        // Then
+        assertThat(tasks.size).isEqualTo(numberOfRecordsInTestDataSql)
+    }
+
+    @Test
+    @Sql("classpath:test-data.sql")
+    fun `when task is deleted then check for the size of list`() {
+        // Given
+        // When
+        objectUnderTest.deleteById(113)
+        val tasks: List<Task> = objectUnderTest.findAll()
+
+        // Then
+        assertThat(tasks.size).isEqualTo(2)
+    }
+
+    @Test
+    @Sql("classpath:test-data.sql")
+    fun `when all open tasks are queried then check for the correct number of open tasks`() {
+        val tasks: List<Task> = objectUnderTest.queryAllOpenTasks()
+
+        assertThat(tasks.size).isEqualTo(numberOfOpenRecordsInTestDataSql)
+    }
+
+    @Test
+    @Sql("classpath:test-data.sql")
+    fun `when all closed tasks are queried then check for the correct number of closed tasks`() {
+        val tasks: List<Task> = objectUnderTest.queryAllClosedTasks()
+
+        assertThat(tasks.size).isEqualTo(numberOfClosedRecordsInTestDataSql)
+    }
+
+    @Test
+    @Sql("classpath:test-data.sql")
+    fun `when description is queried then check if description already exists`() {
+        val doesDescriptionExist1 = objectUnderTest.doesDescriptionExist("second test todo")
+        val doesDescriptionExist2 = objectUnderTest.doesDescriptionExist("feed the cat")
+
+        assertThat(doesDescriptionExist1).isTrue
+        assertThat(doesDescriptionExist2).isFalse
+    }
+
 }
