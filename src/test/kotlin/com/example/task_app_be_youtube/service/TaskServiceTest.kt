@@ -4,17 +4,21 @@ import com.example.task_app_be_youtube.data.Priority
 import com.example.task_app_be_youtube.data.Task
 import com.example.task_app_be_youtube.data.model.TaskCreateRequest
 import com.example.task_app_be_youtube.data.model.TaskDto
+import com.example.task_app_be_youtube.exception.BadRequestException
 import com.example.task_app_be_youtube.repository.TaskRepository
 import io.mockk.MockKAnnotations
+import io.mockk.called
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
+import io.mockk.verify
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDateTime
 
@@ -53,6 +57,35 @@ class TaskServiceTest {
 
         // then
         assertThat(actualTasks.size).isEqualTo(expectedTasks.size)
+    }
+
+    @Test
+    fun `when task is created then check for the task properties`() {
+        // given
+        task.description = createRequest.description
+        task.isTaskOpen = createRequest.isTaskOpen
+        task.priority = createRequest.priority
+
+        // when
+        every { mockRepository.save(any()) } returns task
+        val actualTaskDto: TaskDto = objectUnderTest.createTask(createRequest)
+
+        // then
+        assertThat(actualTaskDto.description).isEqualTo(task.description)
+        assertThat(actualTaskDto.isTaskOpen).isEqualTo(task.isTaskOpen)
+        assertThat(actualTaskDto.priority).isEqualTo(task.priority)
+    }
+
+    @Test
+    fun `when task description already exists then check for bad request exception`() {
+        // given
+        // when
+        every { mockRepository.doesDescriptionExist(any()) } returns true
+        val exception  = assertThrows<BadRequestException> {objectUnderTest.createTask(createRequest)}
+
+        // then
+        assertThat(exception.message).isEqualTo("There is already a task with the description: ${createRequest.description}")
+        verify { mockRepository.save(any()) wasNot called }
     }
 
 }
