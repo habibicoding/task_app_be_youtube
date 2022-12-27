@@ -71,6 +71,7 @@ class TaskServiceTest {
         val actualTaskDto: TaskDto = objectUnderTest.createTask(createRequest)
 
         // then
+        assertThat(actualTaskDto.id).isEqualTo(task.id)
         assertThat(actualTaskDto.description).isEqualTo(task.description)
         assertThat(actualTaskDto.isTaskOpen).isEqualTo(task.isTaskOpen)
         assertThat(actualTaskDto.priority).isEqualTo(task.priority)
@@ -200,6 +201,7 @@ class TaskServiceTest {
         every { mockRepository.save(any()) } returns task
         val actualTaskDto: TaskDto = objectUnderTest.updateTask(taskId, request)
 
+        assertThat(actualTaskDto.id).isEqualTo(task.id)
         assertThat(actualTaskDto.description).isEqualTo(task.description)
         assertThat(actualTaskDto.isReminderSet).isEqualTo(task.isReminderSet)
         assertThat(actualTaskDto.isTaskOpen).isEqualTo(task.isTaskOpen)
