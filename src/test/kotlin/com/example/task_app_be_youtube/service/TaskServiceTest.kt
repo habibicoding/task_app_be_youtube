@@ -184,7 +184,7 @@ class TaskServiceTest {
 
     @Test
     fun `when update task is called then check for the request properties`() {
-        task.description = "Go to Sawarma restaurant"
+        task.description = "Go to Shawarma restaurant"
         task.isReminderSet = false
         task.isTaskOpen = true
         task.priority = Priority.MEDIUM
