@@ -5,14 +5,12 @@ import com.example.task_app_be_youtube.data.Task
 import com.example.task_app_be_youtube.data.model.TaskCreateRequest
 import com.example.task_app_be_youtube.data.model.TaskDto
 import com.example.task_app_be_youtube.exception.BadRequestException
+import com.example.task_app_be_youtube.exception.TaskNotFoundException
 import com.example.task_app_be_youtube.repository.TaskRepository
-import io.mockk.MockKAnnotations
-import io.mockk.called
-import io.mockk.every
+import io.mockk.*
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
-import io.mockk.verify
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 
@@ -33,6 +31,7 @@ class TaskServiceTest {
 
     private val task = Task()
     private lateinit var createRequest: TaskCreateRequest
+    private val taskId: Long = 543
 
     @BeforeEach
     fun setUp() {
@@ -88,4 +87,51 @@ class TaskServiceTest {
         verify { mockRepository.save(any()) wasNot called }
     }
 
+    @Test
+    fun `when get task by id is called then except a task not found exception`() {
+        every{mockRepository.existsById(any())} returns false
+        val exception: TaskNotFoundException = assertThrows {objectUnderTest.getTaskById(taskId)}
+
+        assertThat(exception.message).isEqualTo("Task with the ID: $taskId does not exist!")
+    }
+
+    @Test
+    fun `when all open tasks are fetched check the property is task open is true`() {
+        task.isTaskOpen = true
+        val expectedTasks = listOf(task)
+
+        every { mockRepository.queryAllOpenTasks() } returns expectedTasks.toMutableList()
+        val actualList: List<TaskDto> = objectUnderTest.getAllOpenTasks()
+
+        assertThat(actualList[0].isTaskOpen).isEqualTo(expectedTasks[0].isTaskOpen)
+    }
+
+    @Test
+    fun `when all open tasks are fetched check the property is task open is false`() {
+        task.isTaskOpen = false
+        val expectedTasks = listOf(task)
+
+        every { mockRepository.queryAllClosedTasks() } returns expectedTasks.toMutableList()
+        val actualList: List<TaskDto> = objectUnderTest.getAllClosedTasks()
+
+        assertThat(actualList[0].isTaskOpen).isEqualTo(expectedTasks[0].isTaskOpen)
+    }
+
+    @Test
+    fun `when save task is called then check if argument could be captured`() {
+        val taskSlot = slot<Task>()
+        task.description = createRequest.description
+        task.isTaskOpen = createRequest.isTaskOpen
+        task.isReminderSet = createRequest.isReminderSet
+        task.priority = createRequest.priority
+
+        every { mockRepository.save(capture(taskSlot)) } returns task
+        val actualTaskDto: TaskDto = objectUnderTest.createTask(createRequest)
+
+        verify { mockRepository.save(capture(taskSlot)) }
+        assertThat(taskSlot.captured.description).isEqualTo(actualTaskDto.description)
+        assertThat(taskSlot.captured.isReminderSet).isEqualTo(actualTaskDto.isReminderSet)
+        assertThat(taskSlot.captured.isTaskOpen).isEqualTo(actualTaskDto.isTaskOpen)
+        assertThat(taskSlot.captured.priority).isEqualTo(actualTaskDto.priority)
+    }
 }
