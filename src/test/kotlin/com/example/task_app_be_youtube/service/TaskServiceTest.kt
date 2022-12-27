@@ -74,6 +74,7 @@ class TaskServiceTest {
         assertThat(actualTaskDto.description).isEqualTo(task.description)
         assertThat(actualTaskDto.isTaskOpen).isEqualTo(task.isTaskOpen)
         assertThat(actualTaskDto.priority).isEqualTo(task.priority)
+        assertThat(actualTaskDto.createdOn).isEqualTo(task.createdOn)
     }
 
     @Test
@@ -173,7 +174,7 @@ class TaskServiceTest {
         val taskIdSlot = slot<Long>()
 
         every { mockRepository.existsById(any()) } returns true
-        every { mockRepository.deleteById(capture(taskIdSlot))} returns Unit
+        every { mockRepository.deleteById(capture(taskIdSlot)) } returns Unit
         objectUnderTest.deleteTask(taskId)
 
         verify { mockRepository.deleteById(capture(taskIdSlot)) }
@@ -199,9 +200,10 @@ class TaskServiceTest {
         every { mockRepository.save(any()) } returns task
         val actualTaskDto: TaskDto = objectUnderTest.updateTask(taskId, request)
 
-        assertThat(actualTaskDto.description).isEqualTo( task.description)
-        assertThat(actualTaskDto.isReminderSet).isEqualTo( task.isReminderSet)
-        assertThat(actualTaskDto.isTaskOpen).isEqualTo( task.isTaskOpen)
-        assertThat(actualTaskDto.priority).isEqualTo( task.priority)
+        assertThat(actualTaskDto.description).isEqualTo(task.description)
+        assertThat(actualTaskDto.isReminderSet).isEqualTo(task.isReminderSet)
+        assertThat(actualTaskDto.isTaskOpen).isEqualTo(task.isTaskOpen)
+        assertThat(actualTaskDto.priority).isEqualTo(task.priority)
+        assertThat(actualTaskDto.createdOn).isEqualTo(task.createdOn)
     }
 }
