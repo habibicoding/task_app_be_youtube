@@ -2,6 +2,8 @@ package com.example.task_app_be_youtube.controller
 
 import com.example.task_app_be_youtube.data.Priority
 import com.example.task_app_be_youtube.data.model.TaskDto
+import com.example.task_app_be_youtube.data.model.TaskUpdateRequest
+import com.example.task_app_be_youtube.exception.TaskNotFoundException
 import com.example.task_app_be_youtube.service.TaskService
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -68,6 +70,44 @@ class TaskControllerIntegrationTest(@Autowired private val mockMvc: MockMvc) {
         resultActions.andExpect(MockMvcResultMatchers.status().`is`(200))
         resultActions.andExpect(content().contentType(MediaType.APPLICATION_JSON))
         resultActions.andExpect(jsonPath("$.size()").value(tasks.size))
+    }
 
+    @Test
+    fun `when task id does not exist then except is not found response`() {
+        `when`(mockService.getTaskById(taskId)).thenThrow(TaskNotFoundException("Task with id: $taskId does not exist!"))
+        val resultActions: ResultActions = mockMvc.perform(MockMvcRequestBuilders.get("/api/task/$taskId"))
+
+        resultActions.andExpect(MockMvcResultMatchers.status().isNotFound)
+    }
+
+    @Test
+    fun `when get task by id is called with an character in the url then expect a bad request message`() {
+        val resultActions: ResultActions = mockMvc.perform(MockMvcRequestBuilders.get("/api/task/13L"))
+
+        resultActions.andExpect(MockMvcResultMatchers.status().isBadRequest)
+    }
+
+    @Test
+    fun `given update task when task is updated then check for correct properties`() {
+        val request = TaskUpdateRequest(
+            dummyTaskDto.description,
+            dummyTaskDto.isReminderSet,
+            dummyTaskDto.isTaskOpen,
+            dummyTaskDto.priority
+        )
+
+        `when`(mockService.updateTask(dummyTaskDto.id, request)).thenReturn(dummyTaskDto)
+        val resultActions: ResultActions = mockMvc.perform(
+            MockMvcRequestBuilders.patch(
+                "/api/update/${dummyTaskDto.id}"
+            ).contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(request))
+        )
+
+        resultActions.andExpect(MockMvcResultMatchers.status().isOk)
+        resultActions.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        resultActions.andExpect(jsonPath("$.description").value(dummyTaskDto.description))
+        resultActions.andExpect(jsonPath("$.isReminderSet").value(dummyTaskDto.isReminderSet))
+        resultActions.andExpect(jsonPath("$.isTaskOpen").value(dummyTaskDto.isTaskOpen))
     }
 }
