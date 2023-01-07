@@ -16,6 +16,6 @@ docker run -it --rm --network=postgres_db postgres:alpine psql -h postgres_db -U
 https://www.youtube.com/watch?v=ZKMGMZqnmOk&list=PLjuEK3Ez60n2dTFL7-KETl1yl04kOo-rM
 
 
-### medium.com link:
+### Part on medium.com :
 
-https://medium.com/@habibicoding
+https://medium.com/@habibicoding/kotlin-spring-boot-tutorial-part-1-creating-rest-endpoints-for-a-task-app-148e4aaa7d0f
